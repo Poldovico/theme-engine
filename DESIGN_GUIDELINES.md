@@ -335,8 +335,7 @@ schema:{schemaId} → JSON blob containing full schema definition
 ### Technology Stack
 - **Runtime**: Node.js with TypeScript
 - **Framework**: Fastify (with TypeScript support)
-- **Data Store**: Valkey (Redis-compatible KVS)
-- **Client**: `ioredis` or `redis` npm package for Valkey connection
+- **Data Store**: Valkey with Valkey GLIDE client (`@valkey/valkey-glide`)
 - **Validation**: JSON Schema validation (Fastify has built-in support via JSON Schema)
 - **Testing**: Jest or Mocha with Chai
 
@@ -520,7 +519,7 @@ The merged API response (scope and storage data) enables downstream applications
 
 - [x] Set up TypeScript configuration
 - [x] Define TypeScript interfaces for Theme (storage), Schema (storage), and API response contracts
-- [ ] Initialize Valkey client and connection pooling (ValKeyClient.ts)
+- [x] Initialize Valkey client and connection pooling (ValKeyClient.ts)
 - [ ] Implement ThemeRepository with hash operations (HGET, HSET, HGETALL, HDEL)
 - [ ] Implement SchemaRepository with key-value operations
 - [ ] Create ThemeService with CRUD operations (storage-level)
