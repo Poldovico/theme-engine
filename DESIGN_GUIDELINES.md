@@ -520,7 +520,7 @@ The merged API response (scope and storage data) enables downstream applications
 - [x] Set up TypeScript configuration
 - [x] Define TypeScript interfaces for Theme (storage), Schema (storage), and API response contracts
 - [x] Initialize Valkey client and connection pooling (ValKeyClient.ts)
-- [ ] Implement ThemeRepository with hash operations (HGET, HSET, HGETALL, HDEL)
+- [x] Implement ThemeRepository with hash operations (HGET, HSET, HGETALL, HDEL)
 - [ ] Implement SchemaRepository with key-value operations
 - [ ] Create ThemeService with CRUD operations (storage-level)
 - [ ] Create SchemaService with CRUD operations (storage-level)
