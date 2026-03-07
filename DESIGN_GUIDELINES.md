@@ -131,6 +131,7 @@ This provides:
         "note: list of valid types this variable can hold"
       ],
       "defaultValue": "string (optional)",
+      "defaultType": "string (optional)",
       "required": "boolean (optional)",
       "validation": {
         "pattern": "string (regex, optional)",
@@ -389,10 +390,6 @@ src/
     SchemaService.ts     # Core schema operations
     CSSGenerator.ts      # CSS stylesheet generation
     ValidationService.ts # Schema validation
-  models/
-    Theme.ts             # Theme type definitions
-    Schema.ts            # Schema type definitions
-    Variable.ts          # Variable type definitions
   storage/
     ValKeyClient.ts      # Valkey/Redis client initialization and connection handling
     ThemeRepository.ts   # Theme data access layer (theme:{id} hash operations)
@@ -404,7 +401,10 @@ src/
   utils/
     cssHelpers.ts        # CSS-related utilities
   types/
-    index.ts             # Shared type definitions
+    index.ts             # Re-exports all types
+    storage.ts           # Storage models (Valkey data structures)
+    api.ts               # API models (request/response types, merged data)
+    validation.ts        # Validation-related types
 ```
 
 ### Development Phases
@@ -518,8 +518,8 @@ The merged API response (scope and storage data) enables downstream applications
 
 ## Implementation Checklist
 
-- [ ] Set up TypeScript configuration
-- [ ] Define TypeScript interfaces for Theme (storage), Schema (storage), and API response contracts
+- [x] Set up TypeScript configuration
+- [x] Define TypeScript interfaces for Theme (storage), Schema (storage), and API response contracts
 - [ ] Initialize Valkey client and connection pooling (ValKeyClient.ts)
 - [ ] Implement ThemeRepository with hash operations (HGET, HSET, HGETALL, HDEL)
 - [ ] Implement SchemaRepository with key-value operations
