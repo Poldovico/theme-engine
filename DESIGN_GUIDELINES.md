@@ -330,6 +330,61 @@ schema:{schemaId} → JSON blob containing full schema definition
 - **Operational simplicity**: No relational constraints, referential integrity managed by service layer
 - **Easy backup and inspection**: Clear key patterns, human-readable structure
 
+### Repository Pattern: Storage Abstraction
+
+The storage layer uses the **Repository Pattern** to abstract away storage implementation details. Two interfaces define the contract:
+
+**`IThemeRepository`** - Defines all operations for theme persistence:
+```typescript
+interface IThemeRepository {
+  saveTheme(theme: StoredTheme): Promise<void>
+  getTheme(themeId: string): Promise<StoredTheme | null>
+  getVariable(themeId: string, variableName: string): Promise<StoredVariable | null>
+  setVariable(themeId: string, variableName: string, variable: StoredVariable): Promise<void>
+  setVariables(themeId: string, variables: Record<string, StoredVariable>): Promise<void>
+  deleteVariable(themeId: string, variableName: string): Promise<boolean>
+  deleteTheme(themeId: string): Promise<boolean>
+  exists(themeId: string): Promise<boolean>
+  listThemeIds(): Promise<string[]>
+  getThemeMetadata(themeId: string): Promise<ThemeMetadata | null>
+  updateThemeMetadata(themeId: string, updates: Partial<ThemeMetadata>): Promise<void>
+}
+```
+
+**`ISchemaRepository`** - Defines all operations for schema persistence:
+```typescript
+interface ISchemaRepository {
+  saveSchema(schema: StoredSchema): Promise<void>
+  getSchema(schemaId: string): Promise<StoredSchema | null>
+  deleteSchema(schemaId: string): Promise<boolean>
+  exists(schemaId: string): Promise<boolean>
+  listSchemaIds(): Promise<string[]>
+  updateSchema(schema: StoredSchema): Promise<void>
+}
+```
+
+**Benefits:**
+
+1. **Transparent Storage Swapping**: Replace Valkey with MongoDB, PostgreSQL, or file system without touching service/API logic:
+```typescript
+// Production: Valkey
+const themeRepo: IThemeRepository = new ValkeyThemeRepository(client)
+
+// Testing: Memory/Mock
+const themeRepo: IThemeRepository = new MockThemeRepository()
+
+// Migration: PostgreSQL
+const themeRepo: IThemeRepository = new PostgresThemeRepository(pool)
+```
+
+2. **Clear Contracts**: Repository interfaces explicitly document what operations are available and their signatures
+
+3. **Testability**: Mock implementations allow testing business logic without actual storage
+
+4. **Separation of Concerns**: Storage details isolated from business logic (services) and API logic (controllers/handlers)
+
+5. **Future Flexibility**: Add caching, event hooks, or audit trails in repositories without changing service layer
+
 ## Implementation Considerations
 
 ### Technology Stack
@@ -391,9 +446,10 @@ src/
     ValidationService.ts # Schema validation
   storage/
     ValKeyClient.ts      # Valkey/Redis client initialization and connection handling
-    ThemeRepository.ts   # Theme data access layer (theme:{id} hash operations)
-    SchemaRepository.ts  # Schema data access layer (schema:{id} key-value operations)
-    IRepository.ts       # Repository interface for abstraction
+    IThemeRepository.ts  # Theme repository interface (abstraction contract)
+    ThemeRepository.ts   # Valkey implementation of theme data access layer
+    ISchemaRepository.ts # Schema repository interface (abstraction contract)
+    SchemaRepository.ts  # Valkey implementation of schema data access layer
   hooks/
     errorHandler.ts      # Global error handling hook
     validation.ts        # Request validation hooks

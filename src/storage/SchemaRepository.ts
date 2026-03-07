@@ -9,11 +9,13 @@
 
 import type { GlideClient } from '@valkey/valkey-glide';
 import type { StoredSchema } from '../types/storage.js';
+import type { ISchemaRepository } from './ISchemaRepository.js';
 
 /**
  * Repository for schema storage operations
+ * Implements ISchemaRepository using Valkey GLIDE client
  */
-export class SchemaRepository {
+export class SchemaRepository implements ISchemaRepository {
   constructor(private client: GlideClient) { }
 
   /**

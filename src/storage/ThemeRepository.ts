@@ -11,6 +11,7 @@
 
 import type { GlideClient } from '@valkey/valkey-glide';
 import type { StoredTheme, StoredVariable } from '../types/storage.js';
+import type { IThemeRepository } from './IThemeRepository.js';
 
 const META_FIELD = '__meta__';
 
@@ -27,8 +28,9 @@ interface ThemeMetadata {
 
 /**
  * Repository for theme storage operations
+ * Implements IThemeRepository using Valkey GLIDE client
  */
-export class ThemeRepository {
+export class ThemeRepository implements IThemeRepository {
   constructor(private client: GlideClient) { }
 
   /**
