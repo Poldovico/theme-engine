@@ -6,7 +6,10 @@
 	"service": "app",
 	"workspaceFolder": "/workspaces/whitelabel",
 	"features": {
-		"ghcr.io/devcontainer-config/features/dot-config:4": {}
+		"ghcr.io/devcontainer-config/features/dot-config:4": {},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"moby": false
+		}
 	},
 	"forwardPorts": [
 		6379
