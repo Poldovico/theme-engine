@@ -341,7 +341,7 @@ describe('SchemaService', () => {
       (mockRepo.listSchemaIds as any).mock.mockImplementationOnce(async () => ['schema-1', 'schema-2']);
 
       let callCount = 0;
-      getSchemaFn.mock.mockImplementation(async (id: string) => {
+      getSchemaFn.mock.mockImplementation(async () => {
         if (callCount === 0) {
           callCount++;
           return {
@@ -389,7 +389,7 @@ describe('SchemaService', () => {
       (mockRepo.listSchemaIds as any).mock.mockImplementationOnce(async () => ['schema-1', 'schema-2']);
 
       let callCount = 0;
-      getSchemaFn.mock.mockImplementation(async (id: string) => {
+      getSchemaFn.mock.mockImplementation(async () => {
         if (callCount === 0) {
           callCount++;
           return {

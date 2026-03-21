@@ -17,7 +17,7 @@ import type {
   UpdateThemeRequest,
   VariableUpdate,
 } from '../types/api.js';
-import type { StoredTheme, StoredVariable } from '../types/storage.js';
+import type { StoredTheme, StoredVariable, StoredSchema, SchemaVariable } from '../types/storage.js';
 
 export class ThemeService {
   constructor(
@@ -76,7 +76,7 @@ export class ThemeService {
 
     await this.themeRepository.saveTheme(storedTheme);
 
-    return this.themeToApiTheme(storedTheme, request.schemaId);
+    return this.themeToApiTheme(storedTheme);
   }
 
   /**
@@ -88,7 +88,7 @@ export class ThemeService {
     if (!theme) {
       return null;
     }
-    return this.themeToApiTheme(theme, theme.schemaId);
+    return this.themeToApiTheme(theme);
   }
 
   /**
@@ -113,7 +113,14 @@ export class ThemeService {
       return null;
     }
 
-    return this.mergeVariable(variableName, storedVariable, theme.schemaId);
+    // Fetch schema data if theme references a schema
+    let schemaVariable: SchemaVariable | undefined;
+    if (theme.schemaId) {
+      const schema = await this.schemaRepository.getSchema(theme.schemaId);
+      schemaVariable = schema?.variables[variableName];
+    }
+
+    return this.mergeVariable(variableName, storedVariable, schemaVariable);
   }
 
   /**
@@ -170,7 +177,7 @@ export class ThemeService {
       return null;
     }
 
-    return this.themeToApiTheme(updated, updated.schemaId);
+    return this.themeToApiTheme(updated);
   }
 
   /**
@@ -202,7 +209,14 @@ export class ThemeService {
       return null;
     }
 
-    return this.mergeVariable(variableName, storedVariable, theme.schemaId);
+    // Fetch schema data if theme references a schema
+    let schemaVariable: SchemaVariable | undefined;
+    if (theme.schemaId) {
+      const schema = await this.schemaRepository.getSchema(theme.schemaId);
+      schemaVariable = schema?.variables[variableName];
+    }
+
+    return this.mergeVariable(variableName, storedVariable, schemaVariable);
   }
 
   /**
@@ -270,18 +284,18 @@ export class ThemeService {
     };
 
     await this.themeRepository.saveTheme(newTheme);
-    return this.themeToApiTheme(newTheme, newTheme.schemaId);
+    return this.themeToApiTheme(newTheme);
   }
 
   /**
-   * Merge a StoredVariable with schema metadata to produce an ApiVariable
-   * This is where schema definitions enhance stored variable data
+   * Merge a StoredVariable with SchemaVariable metadata to produce an ApiVariable
+   * This is synchronous: schema data must be passed in, not fetched here
    */
-  private async mergeVariable(
+  private mergeVariable(
     name: string,
     storedVariable: StoredVariable,
-    schemaId: string | undefined
-  ): Promise<ApiVariable> {
+    schemaVariable?: SchemaVariable
+  ): ApiVariable {
     const apiVariable: ApiVariable = {
       name,
       value: storedVariable.value,
@@ -292,22 +306,18 @@ export class ThemeService {
       }),
     };
 
-    // If theme has a schema, merge schema information
-    if (schemaId) {
-      const schema = await this.schemaRepository.getSchema(schemaId);
-      if (schema && schema.variables[name]) {
-        const schemaVar = schema.variables[name];
-        apiVariable.description = schemaVar.description;
-        apiVariable.allowedTypes = schemaVar.allowedTypes;
-        if (schemaVar.defaultType) {
-          apiVariable.defaultType = schemaVar.defaultType;
-        }
-        if (schemaVar.defaultValue) {
-          apiVariable.defaultValue = schemaVar.defaultValue;
-        }
-        if (schemaVar.validation) {
-          apiVariable.validation = schemaVar.validation;
-        }
+    // Merge schema information if provided
+    if (schemaVariable) {
+      apiVariable.description = schemaVariable.description;
+      apiVariable.allowedTypes = schemaVariable.allowedTypes;
+      if (schemaVariable.defaultType) {
+        apiVariable.defaultType = schemaVariable.defaultType;
+      }
+      if (schemaVariable.defaultValue) {
+        apiVariable.defaultValue = schemaVariable.defaultValue;
+      }
+      if (schemaVariable.validation) {
+        apiVariable.validation = schemaVariable.validation;
       }
     }
 
@@ -316,21 +326,26 @@ export class ThemeService {
 
   /**
    * Convert a StoredTheme to ApiTheme, merging schema metadata for all variables
+   * Fetches schema once and reuses it for efficiency
    */
-  private async themeToApiTheme(
-    storedTheme: StoredTheme,
-    schemaId: string | undefined
-  ): Promise<ApiTheme> {
+  private async themeToApiTheme(storedTheme: StoredTheme): Promise<ApiTheme> {
+    // Fetch schema once if available (extracted from theme)
+    let schemaData: StoredSchema | null = null;
+    if (storedTheme.schemaId) {
+      schemaData = await this.schemaRepository.getSchema(storedTheme.schemaId);
+    }
+
     const apiVariables: Record<string, ApiVariable> = {};
 
     // Merge each variable with schema metadata if available
     for (const [name, storedVariable] of Object.entries(
       storedTheme.variables
     )) {
-      apiVariables[name] = await this.mergeVariable(
+      const schemaVariable = schemaData?.variables[name];
+      apiVariables[name] = this.mergeVariable(
         name,
         storedVariable,
-        schemaId
+        schemaVariable
       );
     }
 

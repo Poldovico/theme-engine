@@ -479,7 +479,7 @@ describe('ThemeService', () => {
       (mockThemeRepo.listThemeIds as any).mock.mockImplementationOnce(async () => ['theme-1', 'theme-2']);
 
       let metadataCallCount = 0;
-      getMetadataFn.mock.mockImplementation(async (id: string) => {
+      getMetadataFn.mock.mockImplementation(async () => {
         if (metadataCallCount === 0) {
           metadataCallCount++;
           return {
@@ -499,7 +499,7 @@ describe('ThemeService', () => {
       });
 
       let themeCallCount = 0;
-      getThemeFn.mock.mockImplementation(async (id: string) => {
+      getThemeFn.mock.mockImplementation(async () => {
         if (themeCallCount === 0) {
           themeCallCount++;
           return {
