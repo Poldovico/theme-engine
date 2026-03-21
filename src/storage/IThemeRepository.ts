@@ -27,13 +27,19 @@ export interface IThemeRepository {
 
   /**
    * Set a single variable in a theme
-   * Creates the variable if it doesn't exist, updates if it does
+   * 
+   * Creates the variable if it doesn't exist, updates if it does.
+   * 
+   * **Design Note:** Returns both the stored variable and the theme's schemaId to avoid redundant
+   * theme fetches in the service layer. While this creates a tighter coupling between storage
+   * and business logic, the performance benefit justifies the tradeoff at the repository level.
+   * The service layer can use this metadata to merge schema defaults without refetching the entire theme.
    */
   setVariable(
     themeId: string,
     variableName: string,
     variable: StoredVariable
-  ): Promise<void>;
+  ): Promise<{ variable: StoredVariable; schemaId?: string }>;
 
   /**
    * Set multiple variables in a theme at once

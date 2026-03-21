@@ -197,26 +197,22 @@ export class ThemeService {
       lastModified: now,
     };
 
-    await this.themeRepository.setVariable(
-      themeId,
-      variableName,
-      storedVariable
-    );
-
-    // Fetch the updated variable with schema metadata if available
-    const theme = await this.themeRepository.getTheme(themeId);
-    if (!theme) {
-      return null;
-    }
+    // Set variable and get back the stored variable with schemaId
+    const { variable: resultVariable, schemaId } =
+      await this.themeRepository.setVariable(
+        themeId,
+        variableName,
+        storedVariable
+      );
 
     // Fetch schema data if theme references a schema
     let schemaVariable: SchemaVariable | undefined;
-    if (theme.schemaId) {
-      const schema = await this.schemaRepository.getSchema(theme.schemaId);
+    if (schemaId) {
+      const schema = await this.schemaRepository.getSchema(schemaId);
       schemaVariable = schema?.variables[variableName];
     }
 
-    return this.mergeVariable(variableName, storedVariable, schemaVariable);
+    return this.mergeVariable(variableName, resultVariable, schemaVariable);
   }
 
   /**

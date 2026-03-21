@@ -127,28 +127,43 @@ export class ThemeRepository implements IThemeRepository {
    * Set a single variable in a theme
    * Creates the variable if it doesn't exist, updates if it does
    * Also updates the theme's updatedAt timestamp
+   * Returns the stored variable and the theme's schemaId
    */
   async setVariable(
     themeId: string,
     variableName: string,
     variable: StoredVariable
-  ): Promise<void> {
+  ): Promise<{ variable: StoredVariable; schemaId?: string }> {
     const key = this.getThemeKey(themeId);
+
+    // Fetch current metadata to get schemaId
+    const metaJson = await this.client.hget(key, META_FIELD);
+    let metadata: ThemeMetadata | null = null;
+    let schemaId: string | undefined;
+
+    if (metaJson) {
+      metadata = JSON.parse(metaJson.toString()) as ThemeMetadata;
+      schemaId = metadata.schemaId;
+      // Update the theme's updatedAt timestamp
+      metadata.updatedAt = new Date().toISOString();
+    }
 
     // Update variable and metadata in a single operation
     const fields: Record<string, string> = {
       [variableName]: JSON.stringify(variable),
     };
 
-    // Update the theme's updatedAt timestamp
-    const metaJson = await this.client.hget(key, META_FIELD);
-    if (metaJson) {
-      const metadata = JSON.parse(metaJson.toString()) as ThemeMetadata;
-      metadata.updatedAt = new Date().toISOString();
+    if (metadata) {
       fields[META_FIELD] = JSON.stringify(metadata);
     }
 
     await this.client.hset(key, fields);
+
+    const result: { variable: StoredVariable; schemaId?: string } = { variable };
+    if (schemaId !== undefined) {
+      result.schemaId = schemaId;
+    }
+    return result;
   }
 
   /**

@@ -21,7 +21,9 @@ describe('ThemeService', () => {
       saveTheme: mock.fn(async () => { }),
       getTheme: mock.fn(async () => null),
       getVariable: mock.fn(async () => null),
-      setVariable: mock.fn(async () => { }),
+      setVariable: mock.fn(async () => ({
+        variable: { value: '', type: 'string' },
+      })),
       setVariables: mock.fn(async () => { }),
       deleteVariable: mock.fn(async () => false),
       deleteTheme: mock.fn(async () => false),
@@ -375,15 +377,6 @@ describe('ThemeService', () => {
 
   describe('setVariable', () => {
     it('should set variable and merge with schema', async () => {
-      const theme: StoredTheme = {
-        id: 'theme-1',
-        name: 'Test',
-        schemaId: 'schema-1',
-        variables: {},
-        createdAt: '2026-03-07T10:00:00Z',
-        updatedAt: '2026-03-07T10:00:00Z',
-      };
-
       const schema: StoredSchema = {
         id: 'schema-1',
         name: 'Test Schema',
@@ -395,7 +388,10 @@ describe('ThemeService', () => {
         },
       };
 
-      (mockThemeRepo.getTheme as any).mock.mockImplementationOnce(async () => theme);
+      (mockThemeRepo.setVariable as any).mock.mockImplementationOnce(async () => ({
+        variable: { value: '#fff', type: 'color', lastModified: '2026-03-07T10:00:00Z' },
+        schemaId: 'schema-1',
+      }));
       (mockSchemaRepo.getSchema as any).mock.mockImplementationOnce(async () => schema);
 
       const update: VariableUpdate = {
