@@ -8,6 +8,7 @@
 import { randomUUID } from 'node:crypto';
 import { slugify } from '../lib/slug.js';
 import type { ISchemaRepository } from '../storage/ISchemaRepository.js';
+import type { IThemeRepository } from '../storage/IThemeRepository.js';
 import type {
   ApiSchema,
   SchemaSummary,
@@ -17,7 +18,10 @@ import type {
 import type { StoredSchema } from '../types/storage.js';
 
 export class SchemaService {
-  constructor(private schemaRepository: ISchemaRepository) { }
+  constructor(
+    private schemaRepository: ISchemaRepository,
+    private themeRepository: IThemeRepository
+  ) { }
 
   /**
    * Create a new schema
@@ -68,8 +72,18 @@ export class SchemaService {
 
   /**
    * Delete a schema
+   * Throws an error if the schema is still referenced by any themes
    */
   async deleteSchema(schemaId: string): Promise<boolean> {
+    // Check if any themes reference this schema
+    const referencingThemes = await this.themeRepository.listThemeIdsBySchemaId(schemaId);
+
+    if (referencingThemes.length > 0) {
+      throw new Error(
+        `Cannot delete schema ${schemaId}: still referenced by ${referencingThemes.length} theme(s): ${referencingThemes.join(', ')}`
+      );
+    }
+
     return this.schemaRepository.deleteSchema(schemaId);
   }
 

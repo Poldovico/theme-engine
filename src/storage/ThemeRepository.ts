@@ -300,4 +300,33 @@ export class ThemeRepository implements IThemeRepository {
 
     await this.client.hset(key, { [META_FIELD]: JSON.stringify(metadata) });
   }
+
+  /**
+   * List theme IDs that reference a given schema
+   * Efficiently scans themes and filters by schemaId
+   */
+  async listThemeIdsBySchemaId(schemaId: string): Promise<string[]> {
+    const pattern = 'theme:*';
+    const matchingThemeIds: string[] = [];
+    let cursor = '0';
+
+    do {
+      const result = await this.client.scan(cursor, { match: pattern, count: 100 });
+      cursor = result[0].toString();
+      const keys = result[1];
+
+      // Fetch metadata for each theme key to check schemaId
+      for (const key of keys) {
+        const metaJson = await this.client.hget(key.toString(), META_FIELD);
+        if (metaJson) {
+          const metadata = JSON.parse(metaJson.toString()) as ThemeMetadata;
+          if (metadata.schemaId === schemaId) {
+            matchingThemeIds.push(metadata.id);
+          }
+        }
+      }
+    } while (cursor !== '0');
+
+    return matchingThemeIds;
+  }
 }

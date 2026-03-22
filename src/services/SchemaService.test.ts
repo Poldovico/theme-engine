@@ -6,12 +6,14 @@ import { describe, it, beforeEach, mock } from 'node:test';
 import assert from 'node:assert';
 import { SchemaService } from './SchemaService.js';
 import type { ISchemaRepository } from '../storage/ISchemaRepository.js';
+import type { IThemeRepository } from '../storage/IThemeRepository.js';
 import type { StoredSchema } from '../types/storage.js';
 import type { CreateSchemaRequest, UpdateSchemaRequest } from '../types/api.js';
 
 describe('SchemaService', () => {
   let service: SchemaService;
   let mockRepo: ISchemaRepository;
+  let mockThemeRepo: IThemeRepository;
 
   beforeEach(() => {
     // Create mock repository
@@ -24,7 +26,23 @@ describe('SchemaService', () => {
       updateSchema: mock.fn(async () => { }),
     };
 
-    service = new SchemaService(mockRepo);
+    // Create mock theme repository
+    mockThemeRepo = {
+      saveTheme: mock.fn(async () => { }),
+      getTheme: mock.fn(async () => null),
+      getVariable: mock.fn(async () => null),
+      setVariable: mock.fn(async () => ({ variable: { value: '', type: 'string', lastModified: '' } })),
+      setVariables: mock.fn(async () => { }),
+      deleteVariable: mock.fn(async () => false),
+      deleteTheme: mock.fn(async () => false),
+      exists: mock.fn(async () => false),
+      listThemeIds: mock.fn(async () => []),
+      listThemeIdsBySchemaId: mock.fn(async () => []),
+      getThemeMetadata: mock.fn(async () => null),
+      updateThemeMetadata: mock.fn(async () => { }),
+    };
+
+    service = new SchemaService(mockRepo, mockThemeRepo);
   });
 
   describe('createSchema', () => {
@@ -316,21 +334,40 @@ describe('SchemaService', () => {
   });
 
   describe('deleteSchema', () => {
-    it('should delete schema', async () => {
+    it('should delete schema when not referenced by themes', async () => {
+      (mockThemeRepo.listThemeIdsBySchemaId as any).mock.mockImplementationOnce(async () => []);
       (mockRepo.deleteSchema as any).mock.mockImplementationOnce(async () => true);
 
       const result = await service.deleteSchema('schema-1');
 
       assert.strictEqual(result, true);
+      assert.strictEqual((mockThemeRepo.listThemeIdsBySchemaId as any).mock.calls.length, 1);
       assert.strictEqual((mockRepo.deleteSchema as any).mock.calls.length, 1);
     });
 
     it('should return false if schema does not exist', async () => {
+      (mockThemeRepo.listThemeIdsBySchemaId as any).mock.mockImplementationOnce(async () => []);
       (mockRepo.deleteSchema as any).mock.mockImplementationOnce(async () => false);
 
       const result = await service.deleteSchema('non-existent');
 
       assert.strictEqual(result, false);
+    });
+
+    it('should throw error when schema is referenced by themes', async () => {
+      (mockThemeRepo.listThemeIdsBySchemaId as any).mock.mockImplementationOnce(
+        async () => ['theme-1', 'theme-2']
+      );
+
+      await assert.rejects(
+        async () => await service.deleteSchema('schema-1'),
+        {
+          message: /Cannot delete schema schema-1: still referenced by 2 theme\(s\): theme-1, theme-2/,
+        }
+      );
+
+      // Should not call deleteSchema since validation failed
+      assert.strictEqual((mockRepo.deleteSchema as any).mock.calls.length, 0);
     });
   });
 

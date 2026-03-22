@@ -462,4 +462,123 @@ describe('ThemeRepository', () => {
       );
     });
   });
+
+  describe('listThemeIdsBySchemaId', () => {
+    it('should return empty array when no themes reference the schema', async () => {
+      mockClient.scan.mock.mockImplementation(async () => ['0', []]);
+
+      const ids = await repository.listThemeIdsBySchemaId('schema-1');
+
+      assert.strictEqual(ids.length, 0);
+      assert.deepStrictEqual(ids, []);
+    });
+
+    it('should find themes that reference the schema', async () => {
+      // Mock SCAN to return theme keys
+      mockClient.scan.mock.mockImplementation(async () => [
+        '0',
+        ['theme:theme-1', 'theme:theme-2', 'theme:theme-3'],
+      ]);
+
+      // Mock metadata retrieval
+      mockClient.hget.mock.mockImplementation(async (key: string) => {
+        if (key === 'theme:theme-1') {
+          return JSON.stringify({
+            id: 'theme-1',
+            name: 'Theme 1',
+            schemaId: 'schema-1',
+            createdAt: '2026-03-07T10:00:00Z',
+            updatedAt: '2026-03-07T10:00:00Z',
+          });
+        } else if (key === 'theme:theme-2') {
+          return JSON.stringify({
+            id: 'theme-2',
+            name: 'Theme 2',
+            schemaId: 'schema-2', // different schema
+            createdAt: '2026-03-07T10:00:00Z',
+            updatedAt: '2026-03-07T10:00:00Z',
+          });
+        } else if (key === 'theme:theme-3') {
+          return JSON.stringify({
+            id: 'theme-3',
+            name: 'Theme 3',
+            schemaId: 'schema-1', // same schema
+            createdAt: '2026-03-07T10:00:00Z',
+            updatedAt: '2026-03-07T10:00:00Z',
+          });
+        }
+        return null;
+      });
+
+      const ids = await repository.listThemeIdsBySchemaId('schema-1');
+
+      assert.strictEqual(ids.length, 2);
+      assert.deepStrictEqual(ids, ['theme-1', 'theme-3']);
+    });
+
+    it('should handle themes without schemaId', async () => {
+      // Mock SCAN to return theme keys
+      mockClient.scan.mock.mockImplementation(async () => [
+        '0',
+        ['theme:theme-1', 'theme:theme-2'],
+      ]);
+
+      // Mock metadata retrieval - one with schema, one without
+      mockClient.hget.mock.mockImplementation(async (key: string) => {
+        if (key === 'theme:theme-1') {
+          return JSON.stringify({
+            id: 'theme-1',
+            name: 'Theme 1',
+            schemaId: 'schema-1',
+            createdAt: '2026-03-07T10:00:00Z',
+            updatedAt: '2026-03-07T10:00:00Z',
+          });
+        } else if (key === 'theme:theme-2') {
+          return JSON.stringify({
+            id: 'theme-2',
+            name: 'Theme 2',
+            // no schemaId
+            createdAt: '2026-03-07T10:00:00Z',
+            updatedAt: '2026-03-07T10:00:00Z',
+          });
+        }
+        return null;
+      });
+
+      const ids = await repository.listThemeIdsBySchemaId('schema-1');
+
+      assert.strictEqual(ids.length, 1);
+      assert.deepStrictEqual(ids, ['theme-1']);
+    });
+
+    it('should handle multiple SCAN batches', async () => {
+      // Mock SCAN to return results in two batches
+      let callCount = 0;
+      mockClient.scan.mock.mockImplementation(async () => {
+        callCount++;
+        if (callCount === 1) {
+          return ['5', ['theme:theme-1', 'theme:theme-2']];
+        } else {
+          return ['0', ['theme:theme-3']];
+        }
+      });
+
+      // Mock metadata retrieval - all reference schema-1
+      mockClient.hget.mock.mockImplementation(async (key: string) => {
+        const themeId = key.replace('theme:', '');
+        return JSON.stringify({
+          id: themeId,
+          name: `Theme ${themeId}`,
+          schemaId: 'schema-1',
+          createdAt: '2026-03-07T10:00:00Z',
+          updatedAt: '2026-03-07T10:00:00Z',
+        });
+      });
+
+      const ids = await repository.listThemeIdsBySchemaId('schema-1');
+
+      assert.strictEqual(ids.length, 3);
+      assert.deepStrictEqual(ids, ['theme-1', 'theme-2', 'theme-3']);
+    });
+  });
 });

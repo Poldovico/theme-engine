@@ -498,7 +498,6 @@ src/
   utils/
     cssHelpers.ts        # CSS-related utilities
   types/
-    index.ts             # Re-exports all types
     storage.ts           # Storage models (Valkey data structures)
     api.ts               # API models (request/response types, merged data)
     validation.ts        # Validation-related types
@@ -630,7 +629,7 @@ The merged API response (scope and storage data) enables downstream applications
 - [x] Implement SchemaRepository with key-value operations
 - [x] Create ThemeService with CRUD operations (storage-level)
 - [x] Create SchemaService with CRUD operations (storage-level)
-- [ ] Add referential integrity checks (prevent schema deletion if themes reference it)
+- [x] Add referential integrity checks (prevent schema deletion if themes reference it)
 - [ ] Implement API layer that merges schema + theme data for responses
 - [ ] Implement CSS generator (uses only variable values from theme storage)
 - [ ] Set up Fastify plugins for routes (themes, schemas, variables)

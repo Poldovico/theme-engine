@@ -29,6 +29,7 @@ describe('ThemeService', () => {
       deleteTheme: mock.fn(async () => false),
       exists: mock.fn(async () => false),
       listThemeIds: mock.fn(async () => []),
+      listThemeIdsBySchemaId: mock.fn(async () => []),
       getThemeMetadata: mock.fn(async () => null),
       updateThemeMetadata: mock.fn(async () => { }),
     };

@@ -88,4 +88,10 @@ export interface IThemeRepository {
     themeId: string,
     updates: { name?: string; schemaId?: string }
   ): Promise<void>;
+
+  /**
+   * List theme IDs that reference a given schema
+   * Used to prevent deletion of schemas that are still in use
+   */
+  listThemeIdsBySchemaId(schemaId: string): Promise<string[]>;
 }
