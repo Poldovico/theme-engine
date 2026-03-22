@@ -16,7 +16,7 @@ describe('ThemeRepository', () => {
     mockClient = {
       hset: mock.fn(async () => 1),
       hget: mock.fn(async () => null),
-      hgetall: mock.fn(async () => ({})),
+      hgetall: mock.fn(async () => ([])),
       hdel: mock.fn(async () => 0),
       del: mock.fn(async () => 0),
       exists: mock.fn(async () => 0),
@@ -92,24 +92,34 @@ describe('ThemeRepository', () => {
 
   describe('getTheme', () => {
     it('should retrieve and parse theme correctly', async () => {
-      const mockData = {
-        __meta__: JSON.stringify({
-          id: 'theme-1',
-          name: 'Test Theme',
-          schemaId: 'schema-1',
-          createdAt: '2026-03-07T10:00:00Z',
-          updatedAt: '2026-03-07T10:00:00Z',
-        }),
-        '--primary-color': JSON.stringify({
-          value: '#3498db',
-          type: 'color',
-          lastModified: '2026-03-07T10:00:00Z',
-        }),
-        '--font-size': JSON.stringify({
-          value: '16px',
-          type: 'dimension',
-        }),
-      };
+      // Mock hgetall to return HashDataType array format
+      const mockData = [
+        {
+          field: '__meta__',
+          value: JSON.stringify({
+            id: 'theme-1',
+            name: 'Test Theme',
+            schemaId: 'schema-1',
+            createdAt: '2026-03-07T10:00:00Z',
+            updatedAt: '2026-03-07T10:00:00Z',
+          }),
+        },
+        {
+          field: '--primary-color',
+          value: JSON.stringify({
+            value: '#3498db',
+            type: 'color',
+            lastModified: '2026-03-07T10:00:00Z',
+          }),
+        },
+        {
+          field: '--font-size',
+          value: JSON.stringify({
+            value: '16px',
+            type: 'dimension',
+          }),
+        },
+      ];
 
       mockClient.hgetall.mock.mockImplementationOnce(async () => mockData);
 
@@ -125,7 +135,7 @@ describe('ThemeRepository', () => {
     });
 
     it('should return null for non-existent theme', async () => {
-      mockClient.hgetall.mock.mockImplementationOnce(async () => ({}));
+      mockClient.hgetall.mock.mockImplementationOnce(async () => ([]));
 
       const theme = await repository.getTheme('non-existent');
 
@@ -133,9 +143,12 @@ describe('ThemeRepository', () => {
     });
 
     it('should throw error if metadata field is missing', async () => {
-      mockClient.hgetall.mock.mockImplementationOnce(async () => ({
-        '--primary-color': JSON.stringify({ value: '#fff', type: 'color' }),
-      }));
+      mockClient.hgetall.mock.mockImplementationOnce(async () => ([
+        {
+          field: '--primary-color',
+          value: JSON.stringify({ value: '#fff', type: 'color' }),
+        },
+      ]));
 
       await assert.rejects(
         async () => repository.getTheme('theme-1'),

@@ -74,25 +74,27 @@ export class ThemeRepository implements IThemeRepository {
     const key = this.getThemeKey(themeId);
     const data = await this.client.hgetall(key);
 
-    if (!data || Object.keys(data).length === 0) {
+    if (!data || data.length === 0) {
       return null;
     }
 
-    // Extract metadata
-    const dataRecord = data as Record<string, any>;
-    const metaJson = dataRecord[META_FIELD];
-    if (!metaJson) {
-      throw new Error(`Theme ${themeId} is missing metadata field`);
+    // Map HashDataType array to extract metadata and variables
+    let metadata: ThemeMetadata | null = null;
+    const variables: Record<string, StoredVariable> = {};
+
+    for (const { field, value } of data) {
+      const fieldStr = field.toString();
+      const valueStr = value.toString();
+
+      if (fieldStr === META_FIELD) {
+        metadata = JSON.parse(valueStr) as ThemeMetadata;
+      } else {
+        variables[fieldStr] = JSON.parse(valueStr) as StoredVariable;
+      }
     }
 
-    const metadata = JSON.parse(metaJson.toString()) as ThemeMetadata;
-
-    // Extract variables
-    const variables: Record<string, StoredVariable> = {};
-    for (const [field, value] of Object.entries(data)) {
-      if (field !== META_FIELD) {
-        variables[field] = JSON.parse(value.toString()) as StoredVariable;
-      }
+    if (!metadata) {
+      throw new Error(`Theme ${themeId} is missing metadata field`);
     }
 
     return {
