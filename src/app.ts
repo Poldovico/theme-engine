@@ -12,8 +12,10 @@ import { ThemeRepository } from './storage/ThemeRepository.js';
 import { SchemaRepository } from './storage/SchemaRepository.js';
 import { ThemeService } from './services/ThemeService.js';
 import { SchemaService } from './services/SchemaService.js';
+import { RenderService } from './services/RenderService.js';
 import schemaRoutes from './routes/schemas.js';
 import themeRoutes from './routes/themes.js';
+import renderRoutes from './routes/render.js';
 
 export interface AppOptions {
   logger?: boolean;
@@ -41,6 +43,7 @@ export async function createApp(options: AppOptions = {}): Promise<FastifyInstan
       tags: [
         { name: 'schemas', description: 'Schema management endpoints' },
         { name: 'themes', description: 'Theme management endpoints' },
+        { name: 'render', description: 'CSS rendering endpoints' },
         { name: 'health', description: 'Health check endpoints' },
       ],
     },
@@ -83,10 +86,12 @@ export async function createApp(options: AppOptions = {}): Promise<FastifyInstan
   // Initialize services
   const themeService = new ThemeService(themeRepository, schemaRepository);
   const schemaService = new SchemaService(schemaRepository, themeRepository);
+  const renderService = new RenderService(themeService);
 
   // Register route plugins
   await fastify.register(schemaRoutes, { schemaService });
   await fastify.register(themeRoutes, { themeService });
+  await fastify.register(renderRoutes, { renderService });
 
   return fastify;
 }

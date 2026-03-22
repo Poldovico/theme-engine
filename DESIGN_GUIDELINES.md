@@ -633,7 +633,7 @@ The merged API response (scope and storage data) enables downstream applications
 - [x] Add referential integrity checks (prevent schema deletion if themes reference it)
 - [x] Implement API layer that merges schema + theme data for responses
 - [x] Write integration tests for API endpoints (verify merged responses, Valkey operations)
-- [ ] Implement CSS generator (uses only variable values from theme storage)
+- [x] Implement CSS generator (uses only variable values from theme storage)
 - [ ] Add validation hooks (including allowedTypes validation)
 - [ ] Add error handling hooks
 - [ ] Generate API documentation (clarify storage vs API contract, key patterns)

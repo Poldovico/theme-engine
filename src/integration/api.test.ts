@@ -360,4 +360,118 @@ describe('API Integration Tests', () => {
       assert.strictEqual(freeformTheme.schemaId, undefined);
     });
   });
+
+  describe('Render API', () => {
+    it('should render freeform theme as CSS without descriptions', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/render/${testFreeformThemeId}.css`,
+      });
+
+      assert.strictEqual(response.statusCode, 200);
+      assert.strictEqual(response.headers['content-type'], 'text/css; charset=utf-8');
+
+      const css = response.body;
+      assert.ok(css.includes('/* Theme: Freeform Custom Theme */'));
+      assert.ok(css.includes(':root {'));
+      assert.ok(css.includes('--custom-color: #00ff00'));
+      assert.ok(css.includes('--custom-spacing: 24px'));
+      assert.ok(css.includes('}'));
+
+      // Should NOT include variable descriptions (freeform theme has no schema)
+      assert.ok(!css.includes('/*') || css.split('/*').length === 3); // Only theme name and generated timestamp
+    });
+
+    it('should render theme with schema including descriptions as comments', async () => {
+      // Create a new schema with descriptions
+      const schemaResponse = await app.inject({
+        method: 'POST',
+        url: '/schemas',
+        payload: {
+          name: 'Render Test Schema',
+          variables: {
+            '--brand-primary': {
+              description: 'Primary brand color',
+              allowedTypes: ['color'],
+              defaultType: 'color',
+              defaultValue: '#0066cc',
+            },
+            '--brand-secondary': {
+              description: 'Secondary accent color',
+              allowedTypes: ['color'],
+              defaultType: 'color',
+              defaultValue: '#ff6600',
+            },
+          },
+        },
+      });
+      const schema = JSON.parse(schemaResponse.body);
+
+      // Create a theme with this schema
+      const themeResponse = await app.inject({
+        method: 'POST',
+        url: '/themes',
+        payload: {
+          name: 'Render Test Theme',
+          schemaId: schema.id,
+          variables: {
+            '--brand-primary': {
+              value: '#ff0000',
+              type: 'color',
+            },
+          },
+        },
+      });
+      const theme = JSON.parse(themeResponse.body);
+
+      // Render the theme
+      const renderResponse = await app.inject({
+        method: 'GET',
+        url: `/render/${theme.id}.css`,
+      });
+
+      assert.strictEqual(renderResponse.statusCode, 200);
+      assert.strictEqual(renderResponse.headers['content-type'], 'text/css; charset=utf-8');
+
+      const css = renderResponse.body;
+      assert.ok(css.includes('/* Theme: Render Test Theme */'));
+      assert.ok(css.includes(':root {'));
+      assert.ok(css.includes('/* Primary brand color */'));
+      assert.ok(css.includes('--brand-primary: #ff0000'));
+      assert.ok(css.includes('/* Secondary accent color */'));
+      assert.ok(css.includes('--brand-secondary: #ff6600')); // Should have default value
+      assert.ok(css.includes('}'));
+
+      // Cleanup
+      await app.inject({ method: 'DELETE', url: `/themes/${theme.id}` });
+      await app.inject({ method: 'DELETE', url: `/schemas/${schema.id}` });
+    });
+
+    it('should return 404 for non-existent theme', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/render/nonexistent-theme-id.css',
+      });
+
+      assert.strictEqual(response.statusCode, 404);
+      const error = JSON.parse(response.body);
+      assert.strictEqual(error.error, 'Not Found');
+      assert.ok(error.message.includes('Theme nonexistent-theme-id not found'));
+    });
+
+    it('should sort variables alphabetically in CSS output', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/render/${testFreeformThemeId}.css`,
+      });
+
+      assert.strictEqual(response.statusCode, 200);
+      const css = response.body;
+
+      // Variables should appear in alphabetical order
+      const colorIndex = css.indexOf('--custom-color');
+      const spacingIndex = css.indexOf('--custom-spacing');
+      assert.ok(colorIndex < spacingIndex, 'Variables should be sorted alphabetically');
+    });
+  });
 });
