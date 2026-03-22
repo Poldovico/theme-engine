@@ -22,6 +22,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@fastify/swagger": "^9.7.0",
+    "@fastify/swagger-ui": "^5.2.5",
     "@valkey/valkey-glide": "^2.2.7",
     "fastify": "^5.8.1"
   }
