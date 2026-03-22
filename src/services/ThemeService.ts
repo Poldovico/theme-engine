@@ -296,26 +296,16 @@ export class ThemeService {
       name,
       value: storedVariable.value,
       type: storedVariable.type,
+      // optional fields from storage
       ...(storedVariable.custom && { custom: storedVariable.custom }),
-      ...(storedVariable.lastModified && {
-        lastModified: storedVariable.lastModified,
-      }),
+      ...(storedVariable.lastModified && { lastModified: storedVariable.lastModified }),
+      // optional fields from schema
+      ...(schemaVariable && { description: schemaVariable.description }),
+      ...(schemaVariable && { allowedTypes: schemaVariable.allowedTypes }),
+      ...(schemaVariable?.defaultType && { defaultType: schemaVariable.defaultType }),
+      ...(schemaVariable?.defaultValue && { defaultValue: schemaVariable.defaultValue }),
+      ...(schemaVariable?.validation && { validation: schemaVariable.validation }),
     };
-
-    // Merge schema information if provided
-    if (schemaVariable) {
-      apiVariable.description = schemaVariable.description;
-      apiVariable.allowedTypes = schemaVariable.allowedTypes;
-      if (schemaVariable.defaultType) {
-        apiVariable.defaultType = schemaVariable.defaultType;
-      }
-      if (schemaVariable.defaultValue) {
-        apiVariable.defaultValue = schemaVariable.defaultValue;
-      }
-      if (schemaVariable.validation) {
-        apiVariable.validation = schemaVariable.validation;
-      }
-    }
 
     return apiVariable;
   }

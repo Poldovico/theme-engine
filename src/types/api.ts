@@ -11,12 +11,12 @@ import type { SchemaVariable, StoredSchema, StoredVariable } from './storage.js'
 export interface ApiVariable {
   name: string;
   value: string;
-  type: string; // actual type from storage
-  allowedTypes?: string[]; // from schema (if theme has schema)
-  description?: string; // from schema (if theme has schema)
-  defaultType?: string; // from schema (if theme has schema)
-  custom?: Record<string, unknown>; // from storage
+  type: string; // type of current value
+  custom?: Record<string, unknown>;
   lastModified?: string;
+  allowedTypes?: string[]; // from schema
+  description?: string; // from schema
+  defaultType?: string; // from schema
   defaultValue?: string; // from schema
   validation?: {
     pattern?: string;

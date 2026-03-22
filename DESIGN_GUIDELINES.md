@@ -1,17 +1,20 @@
 # Whitelabel Theming Engine - Agent Guidelines
 
 ## System Overview
+
 A whitelabel theming engine that stores and serves CSS custom properties (variables) as themes. Each theme is a collection of variables that can be retrieved as a CSS stylesheet or manipulated via JSON API.
 
 ## Core Concepts
 
 ### Theme
+
 - A collection of CSS variables (custom properties) with their values
 - Must be identifiable (unique name or ID)
 - Can be rendered as a valid CSS stylesheet
 - Multiple themes can coexist in the system
 
 ### Schema
+
 - Optional metadata structure that defines the variables a theme should contain
 - Expressed as plain JSON
 - Maps variable names to built-in metadata (type, description) and custom metadata expectations
@@ -20,6 +23,7 @@ A whitelabel theming engine that stores and serves CSS custom properties (variab
 - A theme may reference a schema, but can also exist independently
 
 ### CSS Variable
+
 - Name (e.g., `--primary-color`, `--font-size-base`)
 - Value (e.g., `#3498db`, `16px`)
 - Built-in metadata: `type` and `description` (for theme editor form generation)
@@ -31,6 +35,7 @@ A whitelabel theming engine that stores and serves CSS custom properties (variab
 The system distinguishes between two categories of metadata:
 
 **Built-in Metadata**
+
 - Predictable fields that the theming engine recognizes and can use
 - Designed to support common use cases like dynamic form generation in theme editors
 - Fields:
@@ -39,6 +44,7 @@ The system distinguishes between two categories of metadata:
   - Lifecycle timestamps: `createdAt`, `updatedAt` (theme/schema level), `lastModified` (variable level)
 
 **Custom Metadata**
+
 - The `custom` field accepts any arbitrary JSON object
 - Downstream applications can store whatever metadata they need
 - Common use cases:
@@ -56,13 +62,16 @@ This separation allows the engine to provide useful standard features without co
 An important distinction exists between the **storage model** (how data is persisted) and the **API contract** (what clients receive). This separation avoids duplication while providing complete information to API consumers.
 
 ### Storage Model
+
 **Themes store only:**
+
 - Variable values
 - Variable-specific `type` (the actual type of the current value, which may differ from schema allowances)
 - Variable-level `custom` metadata (arbitrary downstream data)
 - Variable-level `lastModified` timestamps
 
 **Schemas store:**
+
 - Variable descriptions (single source of truth)
 - `allowedTypes` array (list of types this variable is permitted to hold)
 - Default values
@@ -70,12 +79,15 @@ An important distinction exists between the **storage model** (how data is persi
 - Schema-level `custom` metadata (structure expected for variable custom metadata)
 
 ### API Response Contract
+
 When clients retrieve a variable via JSON API, the engine **merges data from both the schema and storage**:
+
 ```
 API Response = Storage Variable Data + Schema Metadata (if schema exists)
 ```
 
 This provides:
+
 - `value`: from storage
 - `type`: from storage (the actual type)
 - `allowedTypes`: from schema (what types are valid)
@@ -85,6 +97,7 @@ This provides:
 - `defaultValue`, `validation`: from schema (if not already set)
 
 ### Benefits
+
 1. **No duplication**: Description lives in one place (schema or theme without schema)
 2. **Variable flexibility**: Different theme instances can have different types if needed
 3. **Type safety**: Downstreams can see both the current type and allowed types for multi-type forms
@@ -94,6 +107,7 @@ This provides:
 ## Data Model
 
 ### Theme Object (Storage)
+
 ```json
 {
   "id": "string (unique identifier)",
@@ -117,6 +131,7 @@ This provides:
 **Note:** Theme storage does NOT include `description` - that comes from the schema. If a theme exists without a schema, description can optionally be provided in API requests/responses but is not persisted.
 
 ### Schema Object (Storage)
+
 ```json
 {
   "id": "string (unique identifier)",
@@ -154,10 +169,12 @@ This provides:
 ### Theme CRUD Operations
 
 **GET /themes**
+
 - List all available themes
 - Response: Array of theme summaries (may exclude detailed variable metadata to reduce payload)
 
 **GET /themes/:id**
+
 - Retrieve a specific theme with all variables
 - Response: Theme object with variables merged with schema metadata (if theme has schemaId)
   - If theme has schema: variables include description, allowedTypes, validation from schema
@@ -165,6 +182,7 @@ This provides:
 - This ensures API clients always get complete metadata without needing separate schema fetch
 
 **POST /themes**
+
 - Create a new theme (optionally with initial variables)
 - Body: Theme object (without id, which is generated)
   - Can include optional `schemaId` to associate with a schema
@@ -172,6 +190,7 @@ This provides:
 - Response: Created theme with id (and merged schema metadata if applicable)
 
 **PUT /themes/:id**
+
 - Update an entire theme or its schemaId association
 - Body: Theme object
   - Variables should not include `description`
@@ -179,17 +198,20 @@ This provides:
 - Response: Updated theme (with merged schema data if applicable)
 
 **DELETE /themes/:id**
+
 - Delete a theme
 - Response: Success confirmation
 
 ### CSS Rendering
 
 **GET /themes/:id/stylesheet**
+
 - Retrieve theme as a valid CSS stylesheet
 - Response: CSS document with `:root` selector containing all variables
 - Content-Type: `text/css`
 - Note: Only variable values are included in CSS (no metadata)
 - Example output:
+
 ```css
 :root {
   --primary-color: #3498db;
@@ -201,9 +223,11 @@ This provides:
 ### Variable Operations
 
 **GET /themes/:id/variables/:variableName**
+
 - Get a single variable with value and metadata
 - Response: Merged JSON combining storage and schema data
 - If theme has a schema, description and allowedTypes come from schema
+
 ```json
 {
   "name": "--primary-color",
@@ -224,6 +248,7 @@ This provides:
 ```
 
 **PUT /themes/:id/variables/:variableName**
+
 - Set or update a single variable
 - Body: Variable object with value and optional type/custom metadata
   - `value` (required): The CSS variable value
@@ -233,10 +258,12 @@ This provides:
 - Response: Updated variable (merged with schema data if available)
 
 **PATCH /themes/:id/variables**
+
 - Set or update multiple variables at once
 - Body: Object mapping variable names to update objects
   - Each contains: `value` (required), `type` (optional), `custom` (optional)
   - Do NOT include `description` (comes from schema)
+
 ```json
 {
   "--primary-color": {
@@ -253,40 +280,48 @@ This provides:
   }
 }
 ```
+
 - Response: Updated theme or confirmation
 
 ### Schema Operations
 
 **GET /schemas**
+
 - List all available schemas
 - Response: Array of schema objects
 
 **GET /schemas/:id**
+
 - Retrieve a specific schema
 - Response: Complete schema object
 
 **POST /schemas**
+
 - Create a new schema
 - Body: Schema object
 - Response: Created schema with id
 
 **PUT /schemas/:id**
+
 - Update a schema
 - Body: Schema object
 - Response: Updated schema
 
 **DELETE /schemas/:id**
+
 - Delete a schema
 - Response: Success confirmation
 
 ### Schema-Theme Relationship
 
 **POST /themes/from-schema/:schemaId**
+
 - Create a new theme based on a schema
 - Body: Theme name and optional variable overrides
 - Response: New theme initialized with schema defaults
 
 **GET /themes/:id/validate**
+
 - Validate theme against its schema (if associated)
 - Response: Validation result with any errors/warnings
 
@@ -301,6 +336,7 @@ Valkey is chosen as the primary data store for its simplicity, efficiency, and p
 Themes and schemas use different key patterns optimized for their access patterns:
 
 **Themes** (hash-based buckets):
+
 ```
 theme:{themeId}  (Redis hash)
   --primary-color   → {"value": "#3498db", "type": "color", "custom": {...}, "lastModified": "2026-03-07T10:30:00Z"}
@@ -309,6 +345,7 @@ theme:{themeId}  (Redis hash)
 ```
 
 Operations:
+
 - `HGET theme:{themeId} --variable-name` — fetch single variable
 - `HGETALL theme:{themeId}` — fetch entire theme
 - `HSET theme:{themeId} --var-name <json>` — set single variable
@@ -317,6 +354,7 @@ Operations:
 - `DEL theme:{themeId}` — delete entire theme
 
 **Schemas** (simple key-value):
+
 ```
 schema:{schemaId} → JSON blob containing full schema definition
 ```
@@ -335,6 +373,7 @@ schema:{schemaId} → JSON blob containing full schema definition
 The storage layer uses the **Repository Pattern** to abstract away storage implementation details. Two interfaces define the contract:
 
 **`IThemeRepository`** - Defines all operations for theme persistence:
+
 ```typescript
 interface IThemeRepository {
   saveTheme(theme: StoredTheme): Promise<void>
@@ -352,6 +391,7 @@ interface IThemeRepository {
 ```
 
 **`ISchemaRepository`** - Defines all operations for schema persistence:
+
 ```typescript
 interface ISchemaRepository {
   saveSchema(schema: StoredSchema): Promise<void>
@@ -366,6 +406,7 @@ interface ISchemaRepository {
 **Benefits:**
 
 1. **Transparent Storage Swapping**: Replace Valkey with MongoDB, PostgreSQL, or file system without touching service/API logic:
+
 ```typescript
 // Production: Valkey
 const themeRepo: IThemeRepository = new ValkeyThemeRepository(client)
@@ -377,17 +418,18 @@ const themeRepo: IThemeRepository = new MockThemeRepository()
 const themeRepo: IThemeRepository = new PostgresThemeRepository(pool)
 ```
 
-2. **Clear Contracts**: Repository interfaces explicitly document what operations are available and their signatures
+1. **Clear Contracts**: Repository interfaces explicitly document what operations are available and their signatures
 
-3. **Testability**: Mock implementations allow testing business logic without actual storage
+2. **Testability**: Mock implementations allow testing business logic without actual storage
 
-4. **Separation of Concerns**: Storage details isolated from business logic (services) and API logic (controllers/handlers)
+3. **Separation of Concerns**: Storage details isolated from business logic (services) and API logic (controllers/handlers)
 
-5. **Future Flexibility**: Add caching, event hooks, or audit trails in repositories without changing service layer
+4. **Future Flexibility**: Add caching, event hooks, or audit trails in repositories without changing service layer
 
 ## Implementation Considerations
 
 ### Technology Stack
+
 - **Runtime**: Node.js with TypeScript
 - **Framework**: Fastify (with TypeScript support)
 - **Data Store**: Valkey with Valkey GLIDE client (`@valkey/valkey-glide`)
@@ -465,6 +507,7 @@ src/
 ### Development Phases
 
 **Phase 1: Foundation**
+
 - Set up TypeScript project structure
 - Define data models (Theme, Schema, Variable)
 - Implement file-based storage layer
@@ -472,18 +515,21 @@ src/
 - CSS stylesheet generation
 
 **Phase 2: Core API**
+
 - Single variable GET/PUT operations
 - Multiple variable PATCH operation
 - Error handling and validation
 - Basic tests
 
 **Phase 3: Schema Support**
+
 - Schema CRUD operations
 - Schema validation
 - Theme creation from schema
 - Schema-theme association
 
 **Phase 4: Enhancement**
+
 - Advanced validation
 - Additional endpoints (clone, export, etc.)
 - Comprehensive testing
@@ -492,6 +538,7 @@ src/
 ## Testing Strategy
 
 ### Unit Tests
+
 - CSS generation from variables
 - Variable name validation
 - Schema validation logic
@@ -500,6 +547,7 @@ src/
 - Custom metadata preservation (ensure arbitrary JSON is stored/retrieved correctly)
 
 ### Integration Tests
+
 - Full API endpoint testing
 - Theme CRUD workflow
 - Variable manipulation
@@ -507,12 +555,14 @@ src/
 - Schema-based theme creation
 
 ### End-to-End Tests
+
 - Create theme → Update variables → Retrieve CSS → Use in HTML
 - Create schema → Create theme from schema → Validate
 
 ## Usage Example
 
 ### Downstream App Integration
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -578,8 +628,8 @@ The merged API response (scope and storage data) enables downstream applications
 - [x] Initialize Valkey client and connection pooling (ValKeyClient.ts)
 - [x] Implement ThemeRepository with hash operations (HGET, HSET, HGETALL, HDEL)
 - [x] Implement SchemaRepository with key-value operations
-- [ ] Create ThemeService with CRUD operations (storage-level)
-- [ ] Create SchemaService with CRUD operations (storage-level)
+- [x] Create ThemeService with CRUD operations (storage-level)
+- [x] Create SchemaService with CRUD operations (storage-level)
 - [ ] Add referential integrity checks (prevent schema deletion if themes reference it)
 - [ ] Implement API layer that merges schema + theme data for responses
 - [ ] Implement CSS generator (uses only variable values from theme storage)
