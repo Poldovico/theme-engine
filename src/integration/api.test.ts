@@ -5,15 +5,9 @@
 
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
-import Fastify from 'fastify';
 import type { FastifyInstance } from 'fastify';
-import { initializeClient, closeClient } from '../storage/ValKeyClient.js';
-import { ThemeRepository } from '../storage/ThemeRepository.js';
-import { SchemaRepository } from '../storage/SchemaRepository.js';
-import { ThemeService } from '../services/ThemeService.js';
-import { SchemaService } from '../services/SchemaService.js';
-import schemaRoutes from '../routes/schemas.js';
-import themeRoutes from '../routes/themes.js';
+import { closeClient } from '../storage/ValKeyClient.js';
+import { createApp } from '../app.js';
 
 describe('API Integration Tests', () => {
   let app: FastifyInstance;
@@ -22,24 +16,8 @@ describe('API Integration Tests', () => {
   let testFreeformThemeId: string;
 
   before(async () => {
-    // Initialize Valkey
-    const valkeyClient = await initializeClient();
-
-    // Initialize repositories
-    const themeRepository = new ThemeRepository(valkeyClient);
-    const schemaRepository = new SchemaRepository(valkeyClient);
-
-    // Initialize services
-    const themeService = new ThemeService(themeRepository, schemaRepository);
-    const schemaService = new SchemaService(schemaRepository, themeRepository);
-
-    // Create Fastify app
-    app = Fastify({ logger: false });
-
-    // Register routes
-    await app.register(schemaRoutes, { schemaService });
-    await app.register(themeRoutes, { themeService });
-
+    // Use the real app initialization
+    app = await createApp({ logger: false });
     await app.ready();
   });
 

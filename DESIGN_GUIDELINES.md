@@ -630,7 +630,7 @@ The merged API response (scope and storage data) enables downstream applications
 - [x] Create ThemeService with CRUD operations (storage-level)
 - [x] Create SchemaService with CRUD operations (storage-level)
 - [x] Add referential integrity checks (prevent schema deletion if themes reference it)
-- [ ] Implement API layer that merges schema + theme data for responses
+- [x] Implement API layer that merges schema + theme data for responses
 - [ ] Implement CSS generator (uses only variable values from theme storage)
 - [ ] Set up Fastify plugins for routes (themes, schemas, variables)
 - [ ] Add validation hooks (including allowedTypes validation)
