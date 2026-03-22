@@ -4,9 +4,10 @@ import swaggerUI from '@fastify/swagger-ui';
 import { initializeClient, closeClient } from './storage/ValKeyClient.js';
 import { ThemeRepository } from './storage/ThemeRepository.js';
 import { SchemaRepository } from './storage/SchemaRepository.js';
-// import { ThemeService } from './services/ThemeService.js';
+import { ThemeService } from './services/ThemeService.js';
 import { SchemaService } from './services/SchemaService.js';
 import schemaRoutes from './routes/schemas.js';
+import themeRoutes from './routes/themes.js';
 
 const fastify = Fastify({
   logger: true
@@ -71,11 +72,12 @@ const start = async () => {
     const schemaRepository = new SchemaRepository(valkeyClient);
 
     // Initialize services
-    // const themeService = new ThemeService(themeRepository, schemaRepository);
+    const themeService = new ThemeService(themeRepository, schemaRepository);
     const schemaService = new SchemaService(schemaRepository, themeRepository);
 
     // Register route plugins
     await fastify.register(schemaRoutes, { schemaService });
+    await fastify.register(themeRoutes, { themeService });
 
     // Graceful shutdown
     const shutdown = async () => {
