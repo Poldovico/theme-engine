@@ -1,0 +1,42 @@
+{
+  "name": "Midnight Purple",
+  "schemaId": "SCHEMA_ID_PLACEHOLDER",
+  "variables": {
+    "--primary-color": {
+      "value": "#a855f7",
+      "type": "color"
+    },
+    "--secondary-color": {
+      "value": "#ec4899",
+      "type": "color"
+    },
+    "--background-color": {
+      "value": "#1e1b4b",
+      "type": "color"
+    },
+    "--text-color": {
+      "value": "#e0e7ff",
+      "type": "color"
+    },
+    "--header-gradient": {
+      "value": "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+      "type": "gradient"
+    },
+    "--button-gradient": {
+      "value": "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
+      "type": "gradient"
+    },
+    "--border-radius": {
+      "value": "12px",
+      "type": "string"
+    },
+    "--content-background": {
+      "value": "#2d2659",
+      "type": "color"
+    },
+    "--input-background": {
+      "value": "#2d2659",
+      "type": "color"
+    }
+  }
+}

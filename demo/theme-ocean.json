@@ -1,0 +1,38 @@
+{
+  "name": "Ocean Breeze",
+  "schemaId": "SCHEMA_ID_PLACEHOLDER",
+  "variables": {
+    "--primary-color": {
+      "value": "#0ea5e9",
+      "type": "color"
+    },
+    "--secondary-color": {
+      "value": "#06b6d4",
+      "type": "color"
+    },
+    "--background-color": {
+      "value": "#f0f9ff",
+      "type": "color"
+    },
+    "--text-color": {
+      "value": "#0c4a6e",
+      "type": "color"
+    },
+    "--header-gradient": {
+      "value": "linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)",
+      "type": "gradient"
+    },
+    "--button-gradient": {
+      "value": "linear-gradient(135deg, #0891b2 0%, #0ea5e9 100%)",
+      "type": "gradient"
+    },
+    "--content-background": {
+      "value": "#ffffff",
+      "type": "color"
+    },
+    "--input-background": {
+      "value": "#ffffff",
+      "type": "color"
+    }
+  }
+}

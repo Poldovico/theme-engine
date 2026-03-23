@@ -1,0 +1,94 @@
+{
+  "name": "Website Theme Schema",
+  "version": "1.0.0",
+  "variables": {
+    "--primary-color": {
+      "description": "Main brand color",
+      "allowedTypes": [
+        "color"
+      ],
+      "defaultType": "color",
+      "defaultValue": "#3b82f6"
+    },
+    "--secondary-color": {
+      "description": "Accent color for highlights",
+      "allowedTypes": [
+        "color"
+      ],
+      "defaultType": "color",
+      "defaultValue": "#8b5cf6"
+    },
+    "--background-color": {
+      "description": "Page background color",
+      "allowedTypes": [
+        "color"
+      ],
+      "defaultType": "color",
+      "defaultValue": "#ffffff"
+    },
+    "--text-color": {
+      "description": "Main text color",
+      "allowedTypes": [
+        "color"
+      ],
+      "defaultType": "color",
+      "defaultValue": "#1f2937"
+    },
+    "--header-gradient": {
+      "description": "Header background gradient",
+      "allowedTypes": [
+        "gradient"
+      ],
+      "defaultType": "gradient",
+      "defaultValue": "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)"
+    },
+    "--button-gradient": {
+      "description": "Button background gradient",
+      "allowedTypes": [
+        "gradient"
+      ],
+      "defaultType": "gradient",
+      "defaultValue": "linear-gradient(135deg, #10b981 0%, #3b82f6 100%)"
+    },
+    "--font-family": {
+      "description": "Primary font family",
+      "allowedTypes": [
+        "string"
+      ],
+      "defaultType": "string",
+      "defaultValue": "system-ui, -apple-system, sans-serif"
+    },
+    "--border-radius": {
+      "description": "Default border radius",
+      "allowedTypes": [
+        "string"
+      ],
+      "defaultType": "string",
+      "defaultValue": "8px"
+    },
+    "--content-background": {
+      "description": "Content section background color",
+      "allowedTypes": [
+        "color"
+      ],
+      "defaultType": "color",
+      "defaultValue": "#ffffff"
+    },
+    "--input-background": {
+      "description": "Form input background color",
+      "allowedTypes": [
+        "color"
+      ],
+      "defaultType": "color",
+      "defaultValue": "#ffffff"
+    },
+    "--spacing-unit": {
+      "description": "Base spacing unit",
+      "allowedTypes": [
+        "string"
+      ],
+      "defaultType": "string",
+      "defaultValue": "1rem"
+    }
+  }
+}

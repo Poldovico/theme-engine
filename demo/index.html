@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whitelabel Theme Demo</title>
+  <style id="theme-styles">
+    /* Theme CSS will be loaded here */
+  </style>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family, system-ui, sans-serif);
+      background: var(--background-color, #fff);
+      color: var(--text-color, #000);
+      line-height: 1.6;
+    }
+
+    .header {
+      background: var(--header-gradient, linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%));
+      color: white;
+      padding: calc(var(--spacing-unit, 1rem) * 2);
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--spacing-unit, 1rem);
+    }
+
+    .content-section {
+      background: var(--content-background, white);
+      padding: calc(var(--spacing-unit, 1rem) * 2);
+      margin: var(--spacing-unit, 1rem) 0;
+      border-radius: var(--border-radius, 8px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .button {
+      background: var(--button-gradient, linear-gradient(135deg, #10b981 0%, #3b82f6 100%));
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius, 8px);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin: 0.25rem;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .button.secondary {
+      background: var(--primary-color, #3b82f6);
+    }
+
+    .card {
+      border: 2px solid var(--primary-color, #3b82f6);
+      border-radius: var(--border-radius, 8px);
+      padding: calc(var(--spacing-unit, 1rem) * 1.5);
+      margin: var(--spacing-unit, 1rem) 0;
+    }
+
+    .card h3 {
+      color: var(--primary-color, #3b82f6);
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--secondary-color, #8b5cf6);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: calc(var(--border-radius, 8px) / 2);
+      font-size: 0.875rem;
+      margin: 0.25rem;
+    }
+
+    .theme-controls {
+      display: flex;
+      gap: var(--spacing-unit, 1rem);
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: calc(var(--spacing-unit, 1rem) * 2);
+    }
+
+    .theme-controls select {
+      padding: 0.5rem;
+      border-radius: var(--border-radius, 8px);
+      border: 2px solid var(--primary-color, #3b82f6);
+      font-size: 1rem;
+      background: var(--input-background, white);
+      color: var(--text-color, #000);
+    }
+
+    .editor-panel {
+      background: var(--content-background, rgba(0, 0, 0, 0.05));
+      padding: calc(var(--spacing-unit, 1rem) * 2);
+      border-radius: var(--border-radius, 8px);
+      margin-top: calc(var(--spacing-unit, 1rem) * 2);
+      border: 1px solid var(--primary-color, transparent);
+      opacity: 0.95;
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-unit, 1rem);
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-color, #000);
+    }
+
+    .form-group small {
+      display: block;
+      color: var(--secondary-color, #8b5cf6);
+      margin-bottom: 0.5rem;
+      font-style: italic;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="color"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 2px solid var(--primary-color, #3b82f6);
+      border-radius: var(--border-radius, 8px);
+      font-size: 1rem;
+      background: var(--input-background, white);
+      color: var(--text-color, #000);
+    }
+
+    .form-group input[type="color"] {
+      height: 50px;
+      cursor: pointer;
+    }
+
+    .gradient-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .gradient-preview {
+      width: 100%;
+      height: 50px;
+      border-radius: var(--border-radius, 8px);
+      margin-top: 0.5rem;
+      border: 2px solid var(--primary-color, #3b82f6);
+    }
+
+    .status-message {
+      padding: var(--spacing-unit, 1rem);
+      border-radius: var(--border-radius, 8px);
+      margin: var(--spacing-unit, 1rem) 0;
+      font-weight: 600;
+    }
+
+    .status-message.success {
+      background: var(--secondary-color, #10b981);
+      color: white;
+      opacity: 0.9;
+    }
+
+    .status-message.error {
+      background: #dc2626;
+      color: white;
+      opacity: 0.9;
+    }
+
+    .loading {
+      text-align: center;
+      padding: calc(var(--spacing-unit, 1rem) * 2);
+      color: var(--secondary-color, #8b5cf6);
+    }
+
+    h2 {
+      color: var(--primary-color, #3b82f6);
+      margin-bottom: var(--spacing-unit, 1rem);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>🎨 Whitelabel Theme Demo</h1>
+    <p>Dynamic theming with real-time editing</p>
+  </div>
+
+  <div class="container">
+    <!-- Theme Controls -->
+    <div class="content-section">
+      <div class="theme-controls">
+        <label for="theme-select" style="font-weight: 600;">Select Theme:</label>
+        <select id="theme-select">
+          <option value="">Loading themes...</option>
+        </select>
+        <button class="button secondary" onclick="loadTheme()">Apply Theme</button>
+        <button class="button secondary" onclick="toggleEditor()">Toggle Editor</button>
+      </div>
+      <div id="status"></div>
+    </div>
+
+    <!-- Sample Content -->
+    <div class="content-section">
+      <h2>Sample Content</h2>
+      <p>This is a demonstration of the theming system. All colors, gradients, and styles adjust based on the selected
+        theme.</p>
+
+      <div style="margin: 1.5rem 0;">
+        <button class="button">Primary Action</button>
+        <button class="button secondary">Secondary Action</button>
+      </div>
+
+      <div class="card">
+        <h3>Themed Card Component</h3>
+        <p>This card uses the primary color for its border and heading.</p>
+        <div>
+          <span class="badge">Badge 1</span>
+          <span class="badge">Badge 2</span>
+          <span class="badge">Badge 3</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Another Card</h3>
+        <p>Notice how the border radius, spacing, and colors all adapt to the theme variables.</p>
+      </div>
+    </div>
+
+    <!-- Theme Editor -->
+    <div class="content-section" id="editor-container" style="display: none;">
+      <h2>Theme Editor</h2>
+      <div class="editor-panel">
+        <div id="editor-loading" class="loading">
+          Select a theme to start editing...
+        </div>
+        <form id="theme-form" style="display: none;">
+          <div id="form-fields"></div>
+          <div style="margin-top: 1.5rem;">
+            <button type="submit" class="button">Save Changes</button>
+            <button type="button" class="button secondary" onclick="loadTheme()">Reset</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+    let currentThemeId = null;
+    let currentSchema = null;
+    let themes = [];
+
+    // Load available themes on page load
+    async function loadThemes() {
+      try {
+        const response = await fetch(`${API_BASE}/themes`);
+        themes = await response.json();
+
+        const select = document.getElementById('theme-select');
+        select.innerHTML = themes.length > 0
+          ? themes.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
+          : '<option value="">No themes available</option>';
+
+        if (themes.length > 0) {
+          currentThemeId = themes[0].id;
+          loadTheme();
+        }
+      } catch (error) {
+        showStatus('Failed to load themes: ' + error.message, 'error');
+      }
+    }
+
+    // Load and apply a theme's CSS
+    async function loadTheme() {
+      const select = document.getElementById('theme-select');
+      currentThemeId = select.value;
+
+      if (!currentThemeId) return;
+
+      try {
+        // Fetch the rendered CSS
+        const cssResponse = await fetch(`${API_BASE}/render/${currentThemeId}.css`);
+        const css = await cssResponse.text();
+
+        // Apply the CSS
+        document.getElementById('theme-styles').textContent = css;
+
+        const theme = themes.find(t => t.id === currentThemeId);
+        showStatus(`Theme "${theme?.name || currentThemeId}" applied successfully!`, 'success');
+
+        // Load theme details for editing if editor is open
+        if (document.getElementById('editor-container').style.display !== 'none') {
+          await loadThemeForEditing();
+        }
+      } catch (error) {
+        showStatus('Failed to load theme: ' + error.message, 'error');
+      }
+    }
+
+    // Load theme and schema for editing
+    async function loadThemeForEditing() {
+      if (!currentThemeId) return;
+
+      try {
+        document.getElementById('editor-loading').style.display = 'block';
+        document.getElementById('theme-form').style.display = 'none';
+
+        // Fetch theme details
+        const themeResponse = await fetch(`${API_BASE}/themes/${currentThemeId}`);
+        const theme = await themeResponse.json();
+
+        // Fetch schema if theme has one
+        if (theme.schemaId) {
+          const schemaResponse = await fetch(`${API_BASE}/schemas/${theme.schemaId}`);
+          currentSchema = await schemaResponse.json();
+        } else {
+          // For freeform themes, create a pseudo-schema from existing variables
+          currentSchema = {
+            name: 'Freeform',
+            variables: {}
+          };
+          for (const [name, variable] of Object.entries(theme.variables)) {
+            currentSchema.variables[name] = {
+              description: '',
+              allowedTypes: [variable.type || 'string'],
+              defaultType: variable.type || 'string',
+              defaultValue: variable.value
+            };
+          }
+        }
+
+        // Build the form
+        buildThemeForm(theme, currentSchema);
+
+        document.getElementById('editor-loading').style.display = 'none';
+        document.getElementById('theme-form').style.display = 'block';
+      } catch (error) {
+        showStatus('Failed to load theme for editing: ' + error.message, 'error');
+      }
+    }
+
+    // Build dynamic form based on schema
+    function buildThemeForm(theme, schema) {
+      const formFields = document.getElementById('form-fields');
+      formFields.innerHTML = '';
+
+      for (const [varName, varDef] of Object.entries(schema.variables)) {
+        const currentValue = theme.variables[varName]?.value || varDef.defaultValue;
+        const type = varDef.defaultType || 'string';
+
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
+
+        const label = document.createElement('label');
+        label.textContent = varName;
+        formGroup.appendChild(label);
+
+        if (varDef.description) {
+          const description = document.createElement('small');
+          description.textContent = varDef.description;
+          formGroup.appendChild(description);
+        }
+
+        if (type === 'color') {
+          const input = document.createElement('input');
+          input.type = 'color';
+          input.name = varName;
+          input.value = currentValue;
+          formGroup.appendChild(input);
+
+          const textInput = document.createElement('input');
+          textInput.type = 'text';
+          textInput.value = currentValue;
+          textInput.style.marginTop = '0.5rem';
+          textInput.addEventListener('input', (e) => {
+            if (e.target.value.match(/^#[0-9A-Fa-f]{6}$/)) {
+              input.value = e.target.value;
+            }
+          });
+          input.addEventListener('input', (e) => {
+            textInput.value = e.target.value;
+          });
+          formGroup.appendChild(textInput);
+
+        } else if (type === 'gradient') {
+          // Parse gradient for two-color linear gradient
+          const match = currentValue.match(/linear-gradient\([^,]+,\s*([#\w]+)\s+[\d.]+%,\s*([#\w]+)\s+[\d.]+%\)/);
+          const color1 = match ? match[1] : '#3b82f6';
+          const color2 = match ? match[2] : '#8b5cf6';
+
+          const gradientDiv = document.createElement('div');
+          gradientDiv.className = 'gradient-inputs';
+
+          const input1Div = document.createElement('div');
+          const input1Label = document.createElement('label');
+          input1Label.textContent = 'Start Color';
+          input1Label.style.fontSize = '0.875rem';
+          const input1 = document.createElement('input');
+          input1.type = 'color';
+          input1.name = `${varName}-start`;
+          input1.value = color1;
+          input1Div.appendChild(input1Label);
+          input1Div.appendChild(input1);
+
+          const input2Div = document.createElement('div');
+          const input2Label = document.createElement('label');
+          input2Label.textContent = 'End Color';
+          input2Label.style.fontSize = '0.875rem';
+          const input2 = document.createElement('input');
+          input2.type = 'color';
+          input2.name = `${varName}-end`;
+          input2.value = color2;
+          input2Div.appendChild(input2Label);
+          input2Div.appendChild(input2);
+
+          gradientDiv.appendChild(input1Div);
+          gradientDiv.appendChild(input2Div);
+          formGroup.appendChild(gradientDiv);
+
+          // Preview
+          const preview = document.createElement('div');
+          preview.className = 'gradient-preview';
+          preview.style.background = currentValue;
+          formGroup.appendChild(preview);
+
+          const updatePreview = () => {
+            const gradient = `linear-gradient(135deg, ${input1.value} 0%, ${input2.value} 100%)`;
+            preview.style.background = gradient;
+          };
+          input1.addEventListener('input', updatePreview);
+          input2.addEventListener('input', updatePreview);
+
+        } else {
+          // String type
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.name = varName;
+          input.value = currentValue;
+          formGroup.appendChild(input);
+        }
+
+        formFields.appendChild(formGroup);
+      }
+    }
+
+    // Handle form submission
+    document.getElementById('theme-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const updates = {};
+
+      // Build updates object
+      for (const [varName, varDef] of Object.entries(currentSchema.variables)) {
+        const type = varDef.defaultType || 'string';
+        let value;
+
+        if (type === 'gradient') {
+          const startColor = formData.get(`${varName}-start`);
+          const endColor = formData.get(`${varName}-end`);
+          value = `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`;
+        } else {
+          value = formData.get(varName);
+        }
+
+        // Only include if changed or required
+        if (value) {
+          updates[varName] = { value, type };
+        }
+      }
+
+      // Save each variable
+      try {
+        for (const [varName, varData] of Object.entries(updates)) {
+          await fetch(`${API_BASE}/themes/${currentThemeId}/variables/${varName}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(varData)
+          });
+        }
+
+        showStatus('Theme updated successfully!', 'success');
+
+        // Reload the theme to see changes
+        await loadTheme();
+      } catch (error) {
+        showStatus('Failed to save theme: ' + error.message, 'error');
+      }
+    });
+
+    // Toggle editor visibility
+    function toggleEditor() {
+      const editor = document.getElementById('editor-container');
+      if (editor.style.display === 'none') {
+        editor.style.display = 'block';
+        if (currentThemeId) {
+          loadThemeForEditing();
+        }
+      } else {
+        editor.style.display = 'none';
+      }
+    }
+
+    // Show status message
+    function showStatus(message, type) {
+      const status = document.getElementById('status');
+      status.textContent = message;
+      status.className = `status-message ${type}`;
+
+      setTimeout(() => {
+        status.textContent = '';
+        status.className = '';
+      }, 5000);
+    }
+
+    // Initialize
+    loadThemes();
+  </script>
+</body>
+
+</html>
