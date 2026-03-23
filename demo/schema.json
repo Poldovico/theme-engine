@@ -35,17 +35,19 @@
       "defaultValue": "#1f2937"
     },
     "--header-gradient": {
-      "description": "Header background gradient",
+      "description": "Header background (gradient or solid color)",
       "allowedTypes": [
-        "gradient"
+        "gradient",
+        "color"
       ],
       "defaultType": "gradient",
       "defaultValue": "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)"
     },
     "--button-gradient": {
-      "description": "Button background gradient",
+      "description": "Button background (gradient or solid color)",
       "allowedTypes": [
-        "gradient"
+        "gradient",
+        "color"
       ],
       "defaultType": "gradient",
       "defaultValue": "linear-gradient(135deg, #10b981 0%, #3b82f6 100%)"
