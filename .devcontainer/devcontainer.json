@@ -4,7 +4,7 @@
 	"name": "Whitelabel Theming Engine",
 	"dockerComposeFile": "compose.yaml",
 	"service": "app",
-	"workspaceFolder": "/workspaces/whitelabel",
+	"workspaceFolder": "/workspaces/theme-engine",
 	"features": {
 		"ghcr.io/devcontainer-config/features/dot-config:4": {},
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
