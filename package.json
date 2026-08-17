@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@fastify/swagger": "^9.7.0",
-    "@fastify/swagger-ui": "^5.2.5",
+    "@fastify/swagger-ui": "^6.1.1",
     "@valkey/valkey-glide": "^2.2.7",
     "fastify": "^5.8.1"
   }
