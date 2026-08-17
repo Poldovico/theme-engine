@@ -8,6 +8,11 @@ set -e
 echo "🎨 Whitelabel Theme Demo - Docker Setup"
 echo ""
 
+# Build image
+
+echo "🐳 Building Docker image..."
+docker compose build
+
 # Start services
 echo "🐳 Starting Docker services..."
 docker-compose up -d

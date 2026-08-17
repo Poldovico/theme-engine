@@ -5,8 +5,7 @@
  * Mostly delegates to repository with minimal business logic.
  */
 
-import { randomUUID } from 'node:crypto';
-import { slugify } from '../lib/slug.js';
+import { generateId } from '../lib/id.js';
 import type { ISchemaRepository } from '../storage/ISchemaRepository.js';
 import type { IThemeRepository } from '../storage/IThemeRepository.js';
 import type {
@@ -27,7 +26,7 @@ export class SchemaService {
    * Create a new schema
    */
   async createSchema(request: CreateSchemaRequest): Promise<ApiSchema> {
-    const schemaId = this.generateId(request.name);
+    const schemaId = generateId(request.name, "schema");
 
     const schema: StoredSchema = {
       id: schemaId,
@@ -110,15 +109,5 @@ export class SchemaService {
     }
 
     return summaries;
-  }
-
-  /**
-   * Helper: Generate a descriptive ID from schema name
-   * Pattern: "name-uuid" or "schema-uuid" if no name provided
-   */
-  private generateId(name?: string): string {
-    const uuid = randomUUID();
-    const slug = slugify(name);
-    return slug ? `${slug}-${uuid}` : `schema-${uuid}`;
   }
 }

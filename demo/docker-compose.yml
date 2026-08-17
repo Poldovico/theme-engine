@@ -19,6 +19,7 @@ services:
       dockerfile: Dockerfile
     container_name: whitelabel-api
     environment:
+      - ACCEPT_EXACT_IDS=1
       - NODE_ENV=production
       - VALKEY_HOST=valkey
       - VALKEY_PORT=6379

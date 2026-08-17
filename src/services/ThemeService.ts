@@ -5,8 +5,7 @@
  * when the theme references a schema.
  */
 
-import { randomUUID } from 'node:crypto';
-import { slugify } from '../lib/slug.js';
+import { generateId } from '../lib/id.js';
 import type { IThemeRepository } from '../storage/IThemeRepository.js';
 import type { ISchemaRepository } from '../storage/ISchemaRepository.js';
 import type {
@@ -30,7 +29,7 @@ export class ThemeService {
    * If schemaId is provided and schema exists, use its defaults for missing variables
    */
   async createTheme(request: CreateThemeRequest): Promise<ApiTheme> {
-    const themeId = this.generateId(request.name);
+    const themeId = generateId(request.name, "theme");
     const now = new Date().toISOString();
 
     const variables: Record<string, StoredVariable> = {};
@@ -271,7 +270,7 @@ export class ThemeService {
 
     const now = new Date().toISOString();
     const newTheme: StoredTheme = {
-      id: this.generateId(newName),
+      id: generateId(newName, "theme"),
       name: newName,
       ...(source.schemaId && { schemaId: source.schemaId }),
       variables: this.deepCloneVariables(source.variables),
@@ -364,15 +363,5 @@ export class ThemeService {
         },
       ])
     );
-  }
-
-  /**
-   * Helper: Generate a unique theme ID
-   * Pattern: "name-uuid" or "theme-uuid" if no name provided
-   */
-  private generateId(name?: string): string {
-    const uuid = randomUUID();
-    const slug = slugify(name);
-    return slug ? `${slug}-${uuid}` : `theme-${uuid}`;
   }
 }
